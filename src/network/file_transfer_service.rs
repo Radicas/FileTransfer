@@ -253,11 +253,24 @@ impl FileTransferService {
     async fn handle_file_list_request(stream: &mut TcpStream, path: &str) {
         Logger::info(&format!("处理文件列表请求: {}", path));
 
+        // 显示当前操作系统
+        #[cfg(target_os = "windows")]
+        Logger::info("服务端运行在 Windows 系统");
+
+        #[cfg(target_os = "macos")]
+        Logger::info("服务端运行在 macOS 系统");
+
+        #[cfg(target_os = "linux")]
+        Logger::info("服务端运行在 Linux 系统");
+
         // 创建文件浏览器
+        Logger::info("创建 FileSystemBrowser (Local)");
         let mut browser = FileSystemBrowser::new(FileSystemType::Local);
+        Logger::info(&format!("FileSystemBrowser 初始路径: {}", browser.get_current_path()));
 
         // 如果路径为空，使用默认路径（根目录）
         if path.is_empty() {
+            Logger::warning("请求路径为空，使用默认路径");
             #[cfg(target_os = "windows")]
             {
                 // Windows: 使用当前驱动器的根目录
@@ -271,19 +284,25 @@ impl FileTransferService {
                         }
                     })
                     .unwrap_or("C:\\".to_string());
+                Logger::info(&format!("设置默认路径: {}", default_path));
                 browser.set_current_path(default_path);
             }
 
             #[cfg(not(target_os = "windows"))]
             {
                 // macOS/Linux: 使用根目录
+                Logger::info("设置默认路径: /");
                 browser.set_current_path("/".to_string());
             }
         } else {
+            Logger::info(&format!("设置请求路径: {}", path));
             browser.set_current_path(path.to_string());
         }
 
+        Logger::info(&format!("最终路径: {}", browser.get_current_path()));
+
         // 刷新文件列表
+        Logger::info("开始刷新文件列表");
         if let Err(e) = browser.refresh() {
             Logger::error(&format!("刷新文件列表失败: {}", e));
 

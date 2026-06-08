@@ -80,12 +80,24 @@ pub struct FileSystemBrowser {
 impl FileSystemBrowser {
     /// 创建新的文件系统浏览器
     pub fn new(file_system_type: FileSystemType) -> Self {
+        Logger::info(&format!("创建 FileSystemBrowser - 类型: {:?}", file_system_type));
+
+        // 显示当前操作系统
+        #[cfg(target_os = "windows")]
+        Logger::info("当前操作系统: Windows");
+
+        #[cfg(target_os = "macos")]
+        Logger::info("当前操作系统: macOS");
+
+        #[cfg(target_os = "linux")]
+        Logger::info("当前操作系统: Linux");
+
         let current_path = if file_system_type == FileSystemType::Local {
             // 从系统根目录开始
             #[cfg(target_os = "windows")]
             {
                 // Windows: 使用当前驱动器的根目录
-                std::env::current_dir()
+                let path = std::env::current_dir()
                     .map(|p| {
                         let path = p.to_string_lossy().to_string();
                         // 提取驱动器根目录 (如 C:\)
@@ -96,30 +108,30 @@ impl FileSystemBrowser {
                             "C:\\".to_string()
                         }
                     })
-                    .unwrap_or("C:\\".to_string())
+                    .unwrap_or("C:\\".to_string());
+                Logger::info(&format!("初始化路径 (Windows): {}", path));
+                path
             }
 
             #[cfg(not(target_os = "windows"))]
             {
                 // Unix: 使用根目录
+                Logger::info("初始化路径 (Unix): /");
                 "/".to_string()
             }
         } else {
+            Logger::info("Remote 类型，初始路径为空");
             String::new()
         };
 
-        let mut browser = Self {
+        let browser = Self {
             file_system_type,
             current_path,
             files: Vec::new(),
         };
 
-        // 初始化时加载文件列表
-        if file_system_type == FileSystemType::Local {
-            if let Err(e) = browser.refresh() {
-                eprintln!("初始化文件列表失败: {}", e);
-            }
-        }
+        // 不在初始化时加载文件列表，避免加载错误的路径
+        // 文件列表会在第一次调用 refresh() 时加载
 
         browser
     }
