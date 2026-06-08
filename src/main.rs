@@ -53,7 +53,7 @@ async fn init_services(args: &Args) -> anyhow::Result<()> {
 
     if args.discover {
         // 启动设备发现服务
-        DeviceDiscoverer::instance().initialize()?;
+        DeviceDiscoverer::instance().initialize().await?;
         DeviceDiscoverer::instance().start().await?;
         Logger::info("设备发现服务已启动");
     }
@@ -103,7 +103,10 @@ fn run_gui() -> anyhow::Result<()> {
     Logger::info("应用程序启动(GUI模式)");
     Logger::info(&format!("系统: {}", common::system_info()));
 
-    // 启动GUI
+    // 初始化设备管理器
+    device::DeviceManager::instance().initialize()?;
+
+    // 启动GUI（设备发现服务会在 GUI 应用内部启动）
     gui::run_gui().map_err(|e| anyhow::anyhow!("GUI启动失败: {}", e))
 }
 

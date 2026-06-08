@@ -92,6 +92,21 @@ impl Application for FileTransferApp {
     type Flags = ();
 
     fn new(_flags: Self::Flags) -> (Self, Command<Self::Message>) {
+        // 初始化设备发现服务
+        tokio::spawn(async {
+            if let Err(e) = crate::network::DeviceDiscoverer::instance().initialize().await {
+                crate::logger::Logger::error(&format!("设备发现服务初始化失败: {}", e));
+                return;
+            }
+
+            if let Err(e) = crate::network::DeviceDiscoverer::instance().start().await {
+                crate::logger::Logger::error(&format!("设备发现服务启动失败: {}", e));
+                return;
+            }
+
+            crate::logger::Logger::info("设备发现服务已启动");
+        });
+
         let local_browser = FileSystemBrowser::new(FileSystemType::Local);
         let local_files = local_browser.get_files().to_vec();
 
@@ -134,9 +149,10 @@ impl Application for FileTransferApp {
                 // 使用 Command 异步获取设备列表
                 Command::perform(
                     async {
-                        // 这里暂时返回空列表，因为设备发现服务需要异步运行
-                        // 实际使用时需要启动设备发现服务
-                        Vec::new()
+                        // 从设备发现服务获取在线设备列表
+                        crate::network::DeviceDiscoverer::instance()
+                            .get_online_devices()
+                            .await
                     },
                     Message::DevicesUpdated,
                 )
@@ -586,8 +602,18 @@ impl FileTransferApp {
 pub fn run_gui() -> iced::Result {
     Logger::info("启动GUI界面");
 
-    // 设置中文字体
+    // 根据操作系统设置中文字体
+    #[cfg(target_os = "macos")]
+    let font = iced::Font::with_name("PingFang SC");
+
+    #[cfg(target_os = "windows")]
     let font = iced::Font::with_name("Microsoft YaHei");
+
+    #[cfg(target_os = "linux")]
+    let font = iced::Font::with_name("WenQuanYi Micro Hei");
+
+    #[cfg(not(any(target_os = "macos", target_os = "windows", target_os = "linux")))]
+    let font = iced::Font::default();
 
     let settings = Settings {
         window: iced::window::Settings {
