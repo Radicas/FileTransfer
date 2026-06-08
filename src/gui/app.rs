@@ -92,8 +92,9 @@ impl Application for FileTransferApp {
     type Flags = ();
 
     fn new(_flags: Self::Flags) -> (Self, Command<Self::Message>) {
-        // 初始化设备发现服务
+        // 初始化设备发现服务和文件传输服务
         tokio::spawn(async {
+            // 初始化设备发现服务
             if let Err(e) = crate::network::DeviceDiscoverer::instance().initialize().await {
                 crate::logger::Logger::error(&format!("设备发现服务初始化失败: {}", e));
                 return;
@@ -105,6 +106,19 @@ impl Application for FileTransferApp {
             }
 
             crate::logger::Logger::info("设备发现服务已启动");
+
+            // 初始化文件传输服务
+            if let Err(e) = crate::network::FileTransferService::instance().initialize() {
+                crate::logger::Logger::error(&format!("文件传输服务初始化失败: {}", e));
+                return;
+            }
+
+            if let Err(e) = crate::network::FileTransferService::instance().start().await {
+                crate::logger::Logger::error(&format!("文件传输服务启动失败: {}", e));
+                return;
+            }
+
+            crate::logger::Logger::info("文件传输服务已启动");
         });
 
         let local_browser = FileSystemBrowser::new(FileSystemType::Local);
@@ -191,10 +205,33 @@ impl Application for FileTransferApp {
                     self.status_message = "请先选择目标设备".to_string();
                     return Command::none();
                 }
+
+                // 获取选中设备的 IP 地址
+                let device_id = self.selected_device.clone().unwrap();
+                let devices = self.devices.clone();
+                let device_info = devices.iter().find(|d| d.device_id == device_id);
+
+                if device_info.is_none() {
+                    self.status_message = "设备信息不存在".to_string();
+                    return Command::none();
+                }
+
+                let device_ip = device_info.unwrap().ip_address.clone();
+                let current_path = self.remote_browser.get_current_path().to_string();
+
                 self.status_message = "正在刷新远程文件列表...".to_string();
-                Logger::info("GUI: 刷新远程文件列表");
-                // TODO: 实现实际的远程文件刷新
-                Command::none()
+                Logger::info(&format!("GUI: 刷新远程文件列表 - 设备IP: {}, 路径: {}", device_ip, current_path));
+
+                // 使用 Command 异步获取远程文件列表
+                Command::perform(
+                    async move {
+                        crate::network::FileTransferService::instance()
+                            .request_file_list(&device_ip, &current_path)
+                            .await
+                            .unwrap_or_default()
+                    },
+                    Message::RemoteFilesUpdated,
+                )
             }
 
             Message::LocalFilesUpdated(files) => {
