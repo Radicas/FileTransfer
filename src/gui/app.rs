@@ -187,34 +187,43 @@ impl Application for FileTransferApp {
                 self.status_message = format!("已连接设备: {}", device_id);
                 Logger::info(&format!("GUI: 选中设备 {}", device_id));
 
-                // 选择设备后初始化远程文件浏览器的路径
-                #[cfg(target_os = "windows")]
-                {
-                    // Windows: 假设远程设备也是Windows，使用根目录
-                    self.remote_browser.set_current_path("C:\\".to_string());
+                // 获取设备信息
+                let device_info = self.devices.iter().find(|d| d.device_id == device_id);
+                if device_info.is_none() {
+                    self.status_message = "设备信息不存在".to_string();
+                    return Command::none();
                 }
 
-                #[cfg(not(target_os = "windows"))]
-                {
-                    // macOS/Linux: 假设远程设备也是Unix系统，使用根目录
-                    self.remote_browser.set_current_path("/".to_string());
-                }
+                let device = device_info.unwrap();
+
+                // 根据远程设备的操作系统类型设置初始路径
+                let initial_path = if device.os_type.contains("macOS") || device.os_type.contains("Linux") {
+                    // macOS/Linux: 使用根目录
+                    "/".to_string()
+                } else if device.os_type.contains("Windows") {
+                    // Windows: 使用C盘根目录
+                    "C:\\".to_string()
+                } else {
+                    // 其他系统：默认使用根目录
+                    "/".to_string()
+                };
+
+                self.remote_browser.set_current_path(initial_path.clone());
 
                 // 自动刷新远程文件列表
                 self.status_message = "正在刷新远程文件列表...".to_string();
-                Logger::info(&format!("GUI: 刷新远程文件列表 - 设备IP: {}, 路径: {}",
-                    self.devices.iter().find(|d| d.device_id == device_id).map(|d| d.ip_address.clone()).unwrap_or_default(),
-                    self.remote_browser.get_current_path()
+                Logger::info(&format!("GUI: 刷新远程文件列表 - 设备IP: {}, 操作系统: {}, 路径: {}",
+                    device.ip_address,
+                    device.os_type,
+                    initial_path
                 ));
 
-                let device_ip = self.devices.iter().find(|d| d.device_id == device_id)
-                    .map(|d| d.ip_address.clone()).unwrap_or_default();
-                let path = self.remote_browser.get_current_path().to_string();
+                let device_ip = device.ip_address.clone();
 
                 Command::perform(
                     async move {
                         crate::network::FileTransferService::instance()
-                            .request_file_list(&device_ip, &path).await
+                            .request_file_list(&device_ip, &initial_path).await
                             .ok()
                     },
                     |_| Message::Nothing,
