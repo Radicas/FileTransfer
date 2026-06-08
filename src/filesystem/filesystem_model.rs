@@ -5,6 +5,7 @@
 //! 提供本地和远程文件系统的浏览模型
 
 use crate::common::utils::{format_size, get_file_type};
+use crate::logger::Logger;
 use crate::network::protocol::FileInfoData;
 use std::path::Path;
 
@@ -151,10 +152,18 @@ impl FileSystemBrowser {
         self.files.clear();
 
         let path = Path::new(&self.current_path);
+        Logger::info(&format!("加载本地文件列表 - 路径: {}, 存在: {}, 是目录: {}",
+            self.current_path,
+            path.exists(),
+            path.is_dir()
+        ));
+
         if !path.exists() || !path.is_dir() {
+            Logger::warning(&format!("路径不存在或不是目录: {}", self.current_path));
             return Ok(());
         }
 
+        let mut count = 0;
         for entry in std::fs::read_dir(path)? {
             let entry = entry?;
             let metadata = entry.metadata()?;
@@ -178,8 +187,12 @@ impl FileSystemBrowser {
                 is_writable: true,
             };
 
+            Logger::debug(&format!("发现文件: {} ({})", file_item.name, file_item.file_type));
             self.files.push(file_item);
+            count += 1;
         }
+
+        Logger::info(&format!("加载完成 - 共 {} 个文件", count));
 
         Ok(())
     }
