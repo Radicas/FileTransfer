@@ -186,8 +186,39 @@ impl Application for FileTransferApp {
                 self.selected_device = Some(device_id.clone());
                 self.status_message = format!("已连接设备: {}", device_id);
                 Logger::info(&format!("GUI: 选中设备 {}", device_id));
-                // 选择设备后刷新远程文件列表
-                Command::none()
+
+                // 选择设备后初始化远程文件浏览器的路径
+                #[cfg(target_os = "windows")]
+                {
+                    // Windows: 假设远程设备也是Windows，使用根目录
+                    self.remote_browser.set_current_path("C:\\".to_string());
+                }
+
+                #[cfg(not(target_os = "windows"))]
+                {
+                    // macOS/Linux: 假设远程设备也是Unix系统，使用根目录
+                    self.remote_browser.set_current_path("/".to_string());
+                }
+
+                // 自动刷新远程文件列表
+                self.status_message = "正在刷新远程文件列表...".to_string();
+                Logger::info(&format!("GUI: 刷新远程文件列表 - 设备IP: {}, 路径: {}",
+                    self.devices.iter().find(|d| d.device_id == device_id).map(|d| d.ip_address.clone()).unwrap_or_default(),
+                    self.remote_browser.get_current_path()
+                ));
+
+                let device_ip = self.devices.iter().find(|d| d.device_id == device_id)
+                    .map(|d| d.ip_address.clone()).unwrap_or_default();
+                let path = self.remote_browser.get_current_path().to_string();
+
+                Command::perform(
+                    async move {
+                        crate::network::FileTransferService::instance()
+                            .request_file_list(&device_ip, &path).await
+                            .ok()
+                    },
+                    |_| Message::Nothing,
+                )
             }
 
             Message::RefreshLocalFiles => {

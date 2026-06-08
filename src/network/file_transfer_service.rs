@@ -255,7 +255,33 @@ impl FileTransferService {
 
         // 创建文件浏览器
         let mut browser = FileSystemBrowser::new(FileSystemType::Local);
-        browser.set_current_path(path.to_string());
+
+        // 如果路径为空，使用默认路径（根目录）
+        if path.is_empty() {
+            #[cfg(target_os = "windows")]
+            {
+                // Windows: 使用当前驱动器的根目录
+                let default_path = std::env::current_dir()
+                    .map(|p| {
+                        let path_str = p.to_string_lossy().to_string();
+                        if path_str.len() >= 3 {
+                            path_str[0..3].to_string()
+                        } else {
+                            "C:\\".to_string()
+                        }
+                    })
+                    .unwrap_or("C:\\".to_string());
+                browser.set_current_path(default_path);
+            }
+
+            #[cfg(not(target_os = "windows"))]
+            {
+                // macOS/Linux: 使用根目录
+                browser.set_current_path("/".to_string());
+            }
+        } else {
+            browser.set_current_path(path.to_string());
+        }
 
         // 刷新文件列表
         if let Err(e) = browser.refresh() {
