@@ -1,8 +1,6 @@
-/**
- * @file mod.rs
- * @brief 网络模块入口
- * @details 提供设备发现和文件传输的网络服务
- */
+//! 网络模块入口
+//!
+//! 提供设备发现和文件传输的网络服务
 
 pub mod protocol;
 pub mod device_discoverer;

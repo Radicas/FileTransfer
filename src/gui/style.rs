@@ -1,10 +1,8 @@
 #![allow(dead_code)]
 
-/**
- * @file style.rs
- * @brief GUI样式定义
- * @details 定义应用程序的视觉样式和主题
- */
+//! GUI样式定义
+//!
+//! 定义应用程序的视觉样式和主题
 
 use iced::Color;
 

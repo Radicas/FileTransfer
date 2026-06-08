@@ -1,8 +1,6 @@
-/**
- * @file lib.rs
- * @brief 库入口文件
- * @details 导出所有公共模块
- */
+//! 库入口文件
+//!
+//! 导出所有公共模块
 
 pub mod network;
 pub mod device;

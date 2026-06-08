@@ -1,10 +1,8 @@
 #![allow(dead_code)]
 
-/**
- * @file mod.rs
- * @brief 公共模块入口
- * @details 提供跨平台兼容性和通用工具函数
- */
+//! 公共模块入口
+//!
+//! 提供跨平台兼容性和通用工具函数
 
 pub mod utils;
 pub mod constants;

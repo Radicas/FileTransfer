@@ -1,10 +1,8 @@
 #![allow(dead_code)]
 
-/**
- * @file logger.rs
- * @brief 日志系统核心实现
- * @details 提供跨平台彩色日志记录功能
- */
+//! 日志系统核心实现
+//!
+//! 提供跨平台彩色日志记录功能
 
 use chrono::Local;
 use colored::Colorize;

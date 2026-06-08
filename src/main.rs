@@ -1,8 +1,6 @@
-/**
- * @file main.rs
- * @brief 应用程序入口文件
- * @details 负责应用程序初始化、核心服务启动和主循环
- */
+//! 应用程序入口文件
+//!
+//! 负责应用程序初始化、核心服务启动和主循环
 
 mod network;
 mod device;
@@ -111,6 +109,7 @@ fn run_gui() -> anyhow::Result<()> {
 
 /// 运行GUI模式（未启用gui feature时的提示）
 #[cfg(not(feature = "gui"))]
+#[allow(dead_code)]
 fn run_gui() -> anyhow::Result<()> {
     anyhow::bail!("GUI功能未启用。请使用 --features gui 编译，或使用CLI模式运行。")
 }
@@ -123,6 +122,9 @@ fn main() -> anyhow::Result<()> {
     #[cfg(target_os = "windows")]
     {
         // Windows下设置控制台输出编码为UTF-8
+        // SAFETY: SetConsoleOutputCP和SetConsoleCP是Windows API函数，用于设置控制台编码。
+        // 这些函数是线程安全的，不会导致内存安全问题。设置编码为65001(UTF-8)是安全的操作，
+        // 只影响当前进程的控制台输出，不会影响其他进程或系统状态。
         unsafe {
             // 设置控制台输出编码为UTF-8 (65001)
             winapi::um::wincon::SetConsoleOutputCP(65001);

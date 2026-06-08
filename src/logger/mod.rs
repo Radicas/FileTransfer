@@ -1,10 +1,8 @@
-/**
- * @file mod.rs
- * @brief 日志系统模块入口
- * @details 提供跨平台彩色日志输出功能
- */
+//! 日志系统模块入口
+//!
+//! 提供跨平台彩色日志输出功能
 
-mod logger;
+mod logger_impl;
 
-pub use logger::Logger;
-pub use logger::init_logger;
+pub use logger_impl::Logger;
+pub use logger_impl::init_logger;

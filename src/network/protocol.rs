@@ -1,10 +1,8 @@
 #![allow(dead_code)]
 
-/**
- * @file protocol.rs
- * @brief 网络通信协议定义
- * @details 定义设备发现和文件传输的通信协议
- */
+//! 网络通信协议定义
+//!
+//! 定义设备发现和文件传输的通信协议
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -76,6 +74,12 @@ impl DeviceInfoData {
             os_type: crate::common::system_info(),
             user_name: crate::common::username(),
         }
+    }
+}
+
+impl Default for DeviceInfoData {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

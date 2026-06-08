@@ -1,10 +1,8 @@
 #![allow(dead_code)]
 
-/**
- * @file constants.rs
- * @brief 网络常量定义
- * @details 定义设备发现和文件传输的端口、超时等常量
- */
+//! 网络常量定义
+//!
+//! 定义设备发现和文件传输的端口、超时等常量
 
 /// 设备发现UDP端口
 pub const DISCOVER_PORT: u16 = 38888;

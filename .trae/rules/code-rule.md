@@ -1,11 +1,15 @@
-1. 项目需要加入日志系统，在关键位置添加日志输出，方便调试和问题定位。
-2. 日志输出需要使用中文，包括但不限于错误信息、警告信息、提示信息等。
-3. 所有头文件中的函数都需要添加中文注释，包括函数参数、返回值、异常等。使用doxygen风格的注释。
-4. 所有头文件的最上面要加上头文件说明，包括头文件的作用、作者、日期、版本等。使用doxygen风格的注释。
-5. 编码风格符合Google C++ Style Guide，包括命名规则、缩进、空格、换行等。
-6. 源文件名称统一使用小写字母，例如：functiondata.cpp、CodeAtlas.cpp等。
-7. 类的成员变量需要加上注释说明。
-8. 编写代码时要始终考虑跨平台兼容性。至少要支持MacOS、Windows、Linux三种操作系统。
-9. 代码编译需要同时支持MinGW和MSVC两种编译器。
-10. 设计项目时，需要考虑拓展性，能够方便地添加新的功能模块。适当使用设计模式。
-11. 不允许使用类似#include "../models/functiondata.h"的相对路径引入头文件，必须使用类似#include "core/models/functiondata.h"的绝对路径。
+1. 使用 `log` 或 `tracing` crate 实现日志系统，日志输出使用中文。
+2. 公共API（函数、结构体、枚举、trait）需添加 `///` 文档注释，模块文件开头使用 `//!` 说明模块作用、作者、版本。
+3. 遵循 Rust 官方风格指南，使用 `rustfmt` 格式化。命名规则：函数/变量用 snake_case，类型用 PascalCase，常量用 SCREAMING_SNAKE_CASE。
+4. 源文件和模块目录名使用 snake_case，如 `function_data.rs`。
+5. 结构体字段需添加 `///` 注释说明用途。
+6. 跨平台代码使用 `#[cfg(target_os = "...")]` 条件编译处理平台差异。
+7. 代码需通过 `cargo clippy -- -D warnings` 和 `cargo fmt -- --check` 检查，CI 中运行 `cargo test`。
+8. 使用 trait 定义接口，采用组合而非继承，适当使用 Builder、Strategy 等设计模式。
+9. 模块导入使用绝对路径 `use crate::module::item;`，避免相对路径。
+10. 错误处理使用 `Result<T, E>` 和 `Option<T>`，自定义错误类型实现 `std::error::Error` 和 `Display` trait。
+11. unsafe 代码块必须添加 `// SAFETY:` 注释说明安全条件和理由。
+12. 单元测试用 `#[test]`，文档测试用 `///` 代码块，集成测试放在 `tests/` 目录。
+13. 依赖管理通过 `Cargo.toml`，开发依赖放 `[dev-dependencies]`，构建依赖放 `[build-dependencies]`。
+14. 公共 API 明确标注 `pub`，内部实现保持私有，避免过度暴露。
+15. 类型别名用 `type` 定义，命名使用 PascalCase。

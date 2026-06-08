@@ -1,10 +1,8 @@
 #![allow(dead_code)]
 
-/**
- * @file device_manager.rs
- * @brief 设备管理器实现
- * @details 管理所有发现的设备,提供设备状态跟踪和设备信息查询功能
- */
+//! 设备管理器实现
+//!
+//! 管理所有发现的设备,提供设备状态跟踪和设备信息查询功能
 
 use crate::logger::Logger;
 use crate::network::protocol::DeviceInfoData;

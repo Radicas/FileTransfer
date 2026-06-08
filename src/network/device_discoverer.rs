@@ -1,12 +1,10 @@
 #![allow(dead_code)]
 
-/**
- * @file device_discoverer.rs
- * @brief 设备发现服务实现
- * @details 使用UDP广播机制在局域网中发现其他设备
- */
+//! 设备发现服务实现
+//!
+//! 使用UDP广播机制在局域网中发现其他设备
 
-use crate::common::constants::*;
+use crate::common::constants::DISCOVER_PORT;
 use crate::logger::Logger;
 use crate::network::protocol::DeviceInfoData;
 use once_cell::sync::Lazy;

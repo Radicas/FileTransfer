@@ -1,10 +1,8 @@
 #![allow(dead_code)]
 
-/**
- * @file filesystem_model.rs
- * @brief 文件系统模型实现
- * @details 提供本地和远程文件系统的浏览模型
- */
+//! 文件系统模型实现
+//!
+//! 提供本地和远程文件系统的浏览模型
 
 use crate::common::utils::{format_size, get_file_type};
 use crate::network::protocol::FileInfoData;

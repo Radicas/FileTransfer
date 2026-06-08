@@ -1,12 +1,10 @@
 #![allow(dead_code)]
 
-/**
- * @file app.rs
- * @brief 主应用程序界面
- * @details 实现文件传输系统的主窗口和交互逻辑
- *          左侧：设备树状列表
- *          右侧：本机文件系统 + 目标机器文件系统
- */
+//! 主应用程序界面
+//!
+//! 实现文件传输系统的主窗口和交互逻辑
+//! 左侧：设备树状列表
+//! 右侧：本机文件系统 + 目标机器文件系统
 
 use crate::filesystem::{FileItem, FileSystemBrowser, FileSystemType};
 use crate::logger::Logger;

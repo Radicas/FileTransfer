@@ -1,10 +1,8 @@
 #![allow(dead_code)]
 
-/**
- * @file messagebus.rs
- * @brief 消息总线核心实现
- * @details 实现模块间的解耦通信,采用发布-订阅模式
- */
+//! 消息总线核心实现
+//!
+//! 实现模块间的解耦通信,采用发布-订阅模式
 
 use crate::logger::Logger;
 use once_cell::sync::Lazy;

@@ -1,13 +1,11 @@
 #![allow(dead_code)]
 
-/**
- * @file file_transfer_service.rs
- * @brief 文件传输服务实现
- * @details 提供基于TCP的文件传输服务
- */
+//! 文件传输服务实现
+//!
+//! 提供基于TCP的文件传输服务
 
-use crate::common::constants::*;
-use crate::common::utils::*;
+use crate::common::constants::TRANSFER_PORT;
+use crate::common::utils::{generate_id, get_millis_timestamp};
 use crate::logger::Logger;
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
@@ -67,6 +65,12 @@ impl TransferTaskInfo {
             start_time: get_millis_timestamp(),
             end_time: None,
         }
+    }
+}
+
+impl Default for TransferTaskInfo {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

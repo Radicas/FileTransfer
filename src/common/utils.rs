@@ -1,10 +1,8 @@
 #![allow(dead_code)]
 
-/**
- * @file utils.rs
- * @brief 通用工具函数
- * @details 提供文件大小格式化、时间戳生成等工具函数
- */
+//! 通用工具函数
+//!
+//! 提供文件大小格式化、时间戳生成等工具函数
 
 use chrono::{DateTime, Local};
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -46,7 +44,7 @@ pub fn generate_id(prefix: &str) -> String {
 /// 获取文件类型描述
 pub fn get_file_type(filename: &str) -> String {
     if filename.contains('.') {
-        let ext = filename.split('.').last().unwrap_or("").to_lowercase();
+        let ext = filename.split('.').next_back().unwrap_or("").to_lowercase();
 
         match ext.as_str() {
             "txt" | "doc" | "docx" | "pdf" => "文档".to_string(),
@@ -60,5 +58,47 @@ pub fn get_file_type(filename: &str) -> String {
         }
     } else {
         "文件".to_string()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// 测试文件大小格式化
+    #[test]
+    fn test_format_size() {
+        assert_eq!(format_size(0), "0 B");
+        assert_eq!(format_size(512), "512 B");
+        assert_eq!(format_size(1024), "1.0 KB");
+        assert_eq!(format_size(1024 * 1024), "1.0 MB");
+        assert_eq!(format_size(1024 * 1024 * 1024), "1.0 GB");
+    }
+
+    /// 测试文件类型识别
+    #[test]
+    fn test_get_file_type() {
+        assert_eq!(get_file_type("document.txt"), "文档");
+        assert_eq!(get_file_type("image.jpg"), "图片");
+        assert_eq!(get_file_type("music.mp3"), "音频");
+        assert_eq!(get_file_type("video.mp4"), "视频");
+        assert_eq!(get_file_type("archive.zip"), "压缩文件");
+        assert_eq!(get_file_type("program.exe"), "可执行文件");
+        assert_eq!(get_file_type("code.rs"), "源代码");
+        assert_eq!(get_file_type("folder"), "文件");
+    }
+
+    /// 测试ID生成
+    #[test]
+    fn test_generate_id() {
+        let id1 = generate_id("test");
+        let id2 = generate_id("test");
+        
+        // ID应该以指定前缀开头
+        assert!(id1.starts_with("test_"));
+        assert!(id2.starts_with("test_"));
+        
+        // 两个ID应该不同（包含随机数）
+        assert_ne!(id1, id2);
     }
 }
