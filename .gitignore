@@ -1,0 +1,100 @@
+# 操作系统生成文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# 构建目录
+build/
+out/
+dist/
+local/
+
+# IDE和编辑器
+.vs/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.VSCodeCounter/
+CMakeSettings.json
+
+# CMake生成文件
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.cmake
+!CMakeLists.txt
+
+# 编译生成文件
+*.obj
+*.o
+*.a
+*.lib
+*.so
+*.so.*
+*.dylib
+*.dll
+*.exe
+*.app
+*.out
+*.bin
+*.pdb
+*.ilk
+*.exp
+
+# Qt生成文件
+*.qmake.stash
+*.pro.user
+*.pro.user.*
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+*_automoc.cpp
+*_automoc.h
+
+# 日志文件
+*.log
+logs/
+
+# 临时文件
+*.tmp
+*.temp
+*.bak
+*.cache
+
+# 打包文件
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# 测试覆盖率
+coverage/
+*.gcov
+*.gcda
+*.gcno
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+.Python
+venv/
+ENV/
+
+# Node.js (如果使用)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# 其他
+*.orig
+*.rej

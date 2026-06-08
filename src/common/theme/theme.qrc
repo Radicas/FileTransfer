@@ -1,0 +1,8 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="/">
+        <file>styles/theme-industrial.qss</file>
+        <file>styles/theme-cyberpunk.qss</file>
+        <file>styles/theme-modern.qss</file>
+    </qresource>
+</RCC>
