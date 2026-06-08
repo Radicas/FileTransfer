@@ -330,21 +330,133 @@ impl Application for FileTransferApp {
             }
 
             Message::RemoteGoUp => {
-                if let Ok(()) = self.remote_browser.go_up() {
-                    self.remote_files = self.remote_browser.get_files().to_vec();
-                    self.status_message = format!("远程返回上一级: {}", self.remote_browser.get_current_path());
-                } else {
-                    self.status_message = "已经是根目录".to_string();
+                if self.selected_device.is_none() {
+                    self.status_message = "请先选择目标设备".to_string();
+                    return Command::none();
                 }
-                Command::none()
+
+                // 获取设备信息
+                let device_id = self.selected_device.clone().unwrap();
+                let device_info = self.devices.iter().find(|d| d.device_id == device_id);
+
+                if device_info.is_none() {
+                    self.status_message = "设备信息不存在".to_string();
+                    return Command::none();
+                }
+
+                let device = device_info.unwrap();
+
+                // 获取当前路径
+                let current_path = self.remote_browser.get_current_path();
+
+                // 根据操作系统类型判断是否已经是根目录
+                let is_root = if device.os_type.contains("macOS") || device.os_type.contains("Linux") {
+                    current_path == "/"
+                } else if device.os_type.contains("Windows") {
+                    // Windows: 检查是否是驱动器根目录（如 C:\）
+                    current_path.len() == 3 && current_path.ends_with("\\")
+                } else {
+                    current_path == "/"
+                };
+
+                if is_root {
+                    self.status_message = "已经是根目录".to_string();
+                    return Command::none();
+                }
+
+                // 计算上一级路径
+                let parent_path = if device.os_type.contains("macOS") || device.os_type.contains("Linux") {
+                    // Unix: 使用 Path 处理
+                    let path = std::path::Path::new(current_path);
+                    if let Some(parent) = path.parent() {
+                        if parent == path {
+                            "/".to_string()
+                        } else {
+                            parent.to_string_lossy().to_string()
+                        }
+                    } else {
+                        "/".to_string()
+                    }
+                } else if device.os_type.contains("Windows") {
+                    // Windows: 使用 Path 处理
+                    let path = std::path::Path::new(current_path);
+                    if let Some(parent) = path.parent() {
+                        let parent_str = parent.to_string_lossy().to_string();
+                        // 确保路径格式正确
+                        if parent_str.ends_with("\\") {
+                            parent_str
+                        } else {
+                            format!("{}\\", parent_str)
+                        }
+                    } else {
+                        current_path.to_string()
+                    }
+                } else {
+                    "/".to_string()
+                };
+
+                self.remote_browser.set_current_path(parent_path.clone());
+                self.status_message = format!("远程返回上一级: {}", parent_path);
+                Logger::info(&format!("GUI: 刷新远程文件列表 - 设备IP: {}, 路径: {}",
+                    device.ip_address,
+                    parent_path
+                ));
+
+                let device_ip = device.ip_address.clone();
+
+                Command::perform(
+                    async move {
+                        crate::network::FileTransferService::instance()
+                            .request_file_list(&device_ip, &parent_path).await
+                            .ok()
+                    },
+                    |_| Message::Nothing,
+                )
             }
 
             Message::RemoteGoRoot => {
-                if let Ok(()) = self.remote_browser.go_root() {
-                    self.remote_files = self.remote_browser.get_files().to_vec();
-                    self.status_message = format!("远程返回根目录: {}", self.remote_browser.get_current_path());
+                if self.selected_device.is_none() {
+                    self.status_message = "请先选择目标设备".to_string();
+                    return Command::none();
                 }
-                Command::none()
+
+                // 获取设备信息
+                let device_id = self.selected_device.clone().unwrap();
+                let device_info = self.devices.iter().find(|d| d.device_id == device_id);
+
+                if device_info.is_none() {
+                    self.status_message = "设备信息不存在".to_string();
+                    return Command::none();
+                }
+
+                let device = device_info.unwrap();
+
+                // 根据远程设备的操作系统类型设置根目录路径
+                let root_path = if device.os_type.contains("macOS") || device.os_type.contains("Linux") {
+                    "/".to_string()
+                } else if device.os_type.contains("Windows") {
+                    "C:\\".to_string()
+                } else {
+                    "/".to_string()
+                };
+
+                self.remote_browser.set_current_path(root_path.clone());
+                self.status_message = format!("远程返回根目录: {}", root_path);
+                Logger::info(&format!("GUI: 刷新远程文件列表 - 设备IP: {}, 路径: {}",
+                    device.ip_address,
+                    root_path
+                ));
+
+                let device_ip = device.ip_address.clone();
+
+                Command::perform(
+                    async move {
+                        crate::network::FileTransferService::instance()
+                            .request_file_list(&device_ip, &root_path).await
+                            .ok()
+                    },
+                    |_| Message::Nothing,
+                )
             }
 
             Message::StartUpload => {
